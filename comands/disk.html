@@ -1,0 +1,49 @@
+<!-- disk.html -->
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Disk Management Commands</h1>
+    <p>Disk management in Linux involves handling partitions, mounting file systems, checking disk usage, and managing storage devices.</p>
+    
+    <h2>Partition Management</h2>
+    <ul>
+        <li><b>fdisk -l</b> - list all partitions</li>
+        <li><b>fdisk /dev/sdX</b> - modify disk partitions</li>
+        <li><b>parted /dev/sdX</b> - advanced partition management</li>
+        <li><b>lsblk</b> - display block devices</li>
+    </ul>
+    
+    <h2>File System Management</h2>
+    <ul>
+        <li><b>mkfs.ext4 /dev/sdX1</b> - create an ext4 file system</li>
+        <li><b>mkfs.xfs /dev/sdX1</b> - create an XFS file system</li>
+        <li><b>mount /dev/sdX1 /mnt</b> - mount a file system</li>
+        <li><b>umount /mnt</b> - unmount a file system</li>
+    </ul>
+    
+    <h2>Disk Usage & Monitoring</h2>
+    <ul>
+        <li><b>df -h</b> - display disk space usage</li>
+        <li><b>du -sh /path/to/directory</b> - show directory size</li>
+        <li><b>iostat</b> - report CPU and disk I/O statistics</li>
+        <li><b>iotop</b> - show real-time disk usage by processes</li>
+    </ul>
+    
+    <h2>Checking & Repairing File Systems</h2>
+    <ul>
+        <li><b>fsck /dev/sdX1</b> - check and repair file system</li>
+        <li><b>tune2fs -l /dev/sdX1</b> - show ext2/ext3/ext4 file system details</li>
+        <li><b>e2fsck -f /dev/sdX1</b> - force a file system check</li>
+    </ul>
+    
+    <h2>Swap Management</h2>
+    <ul>
+        <li><b>swapon -s</b> - display swap usage</li>
+        <li><b>mkswap /dev/sdX2</b> - create a swap partition</li>
+        <li><b>swapon /dev/sdX2</b> - enable swap partition</li>
+        <li><b>swapoff /dev/sdX2</b> - disable swap partition</li>
+    </ul>
+    
+    <a href="../main.html">Back to Home</a>
+</body>
+</html>
