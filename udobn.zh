@@ -1,0 +1,365 @@
+#!/bin/bash
+
+# Color codes
+RED='\033[31m'
+GREEN='\033[32m'
+BLUE='\033[34m'
+YELLOW='\033[33m'
+CYAN='\033[36m'
+RESET='\033[0m'
+
+# Commands list
+COMMANDS=("help" "sysinfo" "date" "greet" "clear" "exit" "quit" "cd" "ls" "pwd" "uptime" "whoami" "hostname" "df" "free" "study" "tetris" "snake" "github" "youtube" "telegram" "vscode" "notion" "asmemu" "nano" "touch" "vim" "tutorial")
+
+# Tab autocompletion
+_udobn_shell_autocomplete() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    COMPREPLY=()
+    if [[ "$prev" == "cd" ]]; then
+        COMPREPLY=($(compgen -d -- "$cur"))
+    elif [[ "$prev" == "nano" || "$prev" == "touch" || "$prev" == "vim" ]]; then
+        COMPREPLY=($(compgen -f -- "$cur"))
+    elif [[ -z "$prev" || "$COMP_CWORD" -eq 0 ]]; then
+        COMPREPLY=($(compgen -W "${COMMANDS[*]}" -- "$cur"))
+    fi
+}
+
+# Register autocompletion
+complete -F _udobn_shell_autocomplete udobn_shell
+
+# Manual autocompletion
+autocomplete_command() {
+    local input="$1"
+    local matches=()
+    for cmd in "${COMMANDS[@]}"; do
+        if [[ "$cmd" == "$input"* ]]; then
+            matches+=("$cmd")
+        fi
+    done
+    if [[ ${#matches[@]} -eq 1 ]]; then
+        echo "${matches[0]}"
+    elif [[ ${#matches[@]} -gt 1 ]]; then
+        echo "Matches: ${matches[*]}"
+    fi
+}
+
+# System info
+sysinfo() {
+    echo -e "${YELLOW}System Information:${RESET}"
+    echo -e "📟 ${BLUE}Hostname:${RESET} $(hostname)"
+    echo -e "🖥  ${BLUE}OS:${RESET} $(uname -s)"
+    echo -e "🔧 ${BLUE}Kernel:${RESET} $(uname -r)"
+    echo -e "⏳ ${BLUE}Uptime:${RESET} $(uptime)"
+    echo -e "💾 ${BLUE}Disk Space:${RESET} $(df -h | grep -E '^/dev/')"
+    echo -e "🧠 ${BLUE}Memory:${RESET} $(free -h | grep 'Mem:')"
+}
+
+# Greet user
+greet() {
+    local username=$(whoami)
+    if [[ -n "$1" ]]; then
+        echo -e "${GREEN}Hello, $1! Nice to see you, $username!${RESET}"
+    else
+        echo -e "${GREEN}Hello, $username! How can I assist you today?${RESET}"
+    fi
+}
+
+# Snake game
+snake() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if ! command -v nsnake &> /dev/null; then
+            echo -e "${YELLOW}Installing nSnake for macOS...${RESET}"
+            brew install nsnake || echo -e "${RED}Installation failed! Please install nsnake manually.${RESET}"
+        fi
+        if command -v nsnake &> /dev/null; then
+            nsnake
+        else
+            echo -e "${RED}nSnake is not installed!${RESET}"
+        fi
+    else
+        if ! command -v nsnake &> /dev/null; then
+            echo -e "${YELLOW}Installing nSnake...${RESET}"
+            sudo apt-get install -y nsnake || echo -e "${RED}Installation failed! Please install nsnake manually.${RESET}"
+        fi
+        if command -v nsnake &> /dev/null; then
+            nsnake
+        else
+            echo -e "${RED}nSnake is not installed!${RESET}"
+        fi
+    fi
+}
+
+# Tetris game
+tetris() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if ! command -v bastet &> /dev/null; then
+            echo -e "${YELLOW}Installing Bastet (Tetris) for macOS...${RESET}"
+            brew install bastet || echo -e "${RED}Installation failed! Please install bastet manually.${RESET}"
+        fi
+        if command -v bastet &> /dev/null; then
+            bastet
+        else
+            echo -e "${RED}Bastet (Tetris) is not installed!${RESET}"
+        fi
+    else
+        if ! command -v bastet &> /dev/null; then
+            echo -e "${YELLOW}Installing Bastet (Tetris)...${RESET}"
+            sudo apt-get install -y bastet || echo -e "${RED}Installation failed! Please install bastet manually.${RESET}"
+        fi
+        if command -v bastet &> /dev/null; then
+            bastet
+        else
+            echo -e "${RED}Bastet (Tetris) is not installed!${RESET}"
+        fi
+    fi
+}
+
+# Study directory
+study() {
+    local study_dir="$HOME/Documents/coding"
+    if [[ -d "$study_dir" ]]; then
+        cd "$study_dir"
+    else
+        echo -e "${RED}Directory $study_dir not found!${RESET}"
+    fi
+}
+
+# Remove file
+rm_file() {
+    if [[ -n "$1" ]]; then
+        if [[ -f "$1" ]]; then
+            command rm "$1"
+            echo -e "${GREEN}File $1 deleted.${RESET}"
+        else
+            echo -e "${RED}File $1 not found!${RESET}"
+        fi
+    else
+        echo -e "${RED}Please specify a filename to delete!${RESET}"
+    fi
+}
+
+# Open YouTube
+youtube() {
+    open "https://youtube.com" || xdg-open "https://youtube.com"
+}
+
+# Open GitHub
+github() {
+    open "https://github.com" || xdg-open "https://github.com"
+}
+
+# Open Telegram
+telegram() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if open -a Telegram 2>/dev/null; then
+            return 0
+        else
+            echo -e "${RED}Telegram is not installed on macOS!${RESET}"
+        fi
+    else
+        if command -v telegram-desktop &> /dev/null; then
+            telegram-desktop &
+        else
+            echo -e "${RED}Telegram Desktop is not installed on Linux!${RESET}"
+            echo -e "${YELLOW}You can install it with: sudo apt-get install telegram-desktop${RESET}"
+        fi
+    fi
+}
+
+# Open VS Code
+vscode() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if open -a "Visual Studio Code" 2>/dev/null; then
+            return 0
+        else
+            echo -e "${RED}VS Code is not installed on macOS!${RESET}"
+        fi
+    else
+        if command -v code &> /dev/null; then
+            code &
+        else
+            echo -e "${RED}VS Code is not installed on Linux!${RESET}"
+            echo -e "${YELLOW}You can install it with: sudo snap install --classic code${RESET}"
+        fi
+    fi
+}
+
+# Open Notion
+notion() {
+    open "https://www.notion.so" || xdg-open "https://www.notion.so"
+}
+
+# Open Assembly emulator
+asmemu() {
+    open "https://rivoire.cs.sonoma.edu/cs351/wemips/" || xdg-open "https://www.tutorialspoint.com/compile_assembly_online.php"
+}
+
+# Nano editor
+nano() {
+    command nano "$@"
+}
+
+# Vim editor
+vim() {
+    command vim "$@"
+}
+
+# Create file
+touch() {
+    if [[ -n "$1" ]]; then
+        command touch "$1"
+        echo -e "${GREEN}File $1 created.${RESET}"
+    else
+        echo -e "${RED}Please specify a filename!${RESET}"
+    fi
+}
+
+# Open tutorial
+tutorial() {
+    local local_file="./main.html"
+    local repo_url="https://github.com/Sbhaly/study/archive/refs/heads/main.zip"
+    local temp_dir="/tmp/study_temp"
+    local downloaded_file="$temp_dir/study-main/main.html"
+
+    # Check if main.html exists locally
+    if [[ -f "$local_file" ]]; then
+        echo -e "${GREEN}Opening local main.html...${RESET}"
+        open "$local_file" || xdg-open "$local_file"
+    else
+        echo -e "${YELLOW}main.html not found locally. Downloading from GitHub...${RESET}"
+        # Create temp directory
+        mkdir -p "$temp_dir"
+        # Download and unzip repository
+        curl -L "$repo_url" -o "$temp_dir/study.zip" && unzip -o "$temp_dir/study.zip" -d "$temp_dir"
+        if [[ -f "$downloaded_file" ]]; then
+            echo -e "${GREEN}Opening downloaded main.html...${RESET}"
+            open "$downloaded_file" || xdg-open "$downloaded_file"
+        else
+            echo -e "${RED}Failed to find main.html in the downloaded repository!${RESET}"
+        fi
+        # Clean up (optional, comment out if you want to keep files)
+        rm -rf "$temp_dir"
+    fi
+}
+
+# Startup screen
+clear
+echo -e "${CYAN}"
+cat <<EOF
+          ###############          
+       #####################       
+     ######     ###     ######     
+   ######       ###        #####   
+  ####          ###          ####  
+ ####           ###           #### 
+ ###            ###            ####
+###             ###             ###
+###             ###             ###
+###            #####            ###
+###          ########           ###
+###        ############         ###
+ ###     ###### ### #####      ####
+ ####   #####   ###   #####   #### 
+  #########     ###     #########  
+   ######       ###       ######   
+     ######     ###     ######     
+       #####################       
+          ###############          
+EOF
+echo -e "${RESET}"
+
+# Welcome message
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    UPTIME_INFO=$(uptime | sed 's/.*up //; s/,.*//')
+else
+    UPTIME_INFO=$(uptime -p)
+fi
+echo -e "${GREEN}Welcome to Udobn Shell, $(whoami)! 🤖${RESET}"
+echo -e "${YELLOW}System Info:${RESET}"
+echo -e "📟 ${BLUE}Hostname:${RESET} $(hostname)"
+echo -e "🖥  ${BLUE}OS:${RESET} $(uname -s)"
+echo -e "🔧 ${BLUE}Kernel:${RESET} $(uname -r)"
+echo -e "⏳ ${BLUE}Uptime:${RESET} $UPTIME_INFO"
+echo ""
+
+# Help function
+show_help() {
+    echo -e "${BLUE}Available commands:${RESET}"
+    for cmd in "${COMMANDS[@]}"; do
+        echo -e "${GREEN}$cmd${RESET}"
+    done
+}
+
+# History setup
+HISTFILE=~/.udobn_shell_history
+HISTSIZE=1000
+HISTFILESIZE=2000
+history -r
+
+# Bind autocompletion
+bind -x '"\t":"bash -c \"_udobn_shell_autocomplete\""'
+
+# Main loop
+while true; do
+    echo -ne "${CYAN}Udobn Shell [$(pwd)] > ${RESET}"
+    read -e -r -p "" user_input
+
+    # Split input
+    user_input_array=($user_input)
+    command="${user_input_array[0]}"
+    args="${user_input_array[@]:1}"
+
+    # Manual autocomplete
+    if [[ -n "$command" ]]; then
+        completed_command=$(autocomplete_command "$command")
+        if [[ -n "$completed_command" && "$completed_command" != *"Matches:"* ]]; then
+            command="$completed_command"
+            user_input="$command $args"
+        elif [[ "$completed_command" == *"Matches:"* ]]; then
+            echo -e "${YELLOW}$completed_command${RESET}"
+            continue
+        fi
+    else
+        continue
+    fi
+
+    # Split input again
+    user_input_array=($user_input)
+    command="${user_input_array[0]}"
+    args="${user_input_array[@]:1}"
+
+    # Command handling
+    case "$command" in
+        help) show_help ;;
+        sysinfo) sysinfo ;;
+        date) date ;;
+        greet) greet "$args" ;;
+        clear) clear ;;
+        exit | quit) echo -e "${RED}Exiting Udobn Shell...${RESET}"; exit 0 ;;
+        cd) cd "$args" || echo -e "${RED}Directory not found!${RESET}" ;;
+        ls) ls --color=auto ;;
+        pwd) pwd ;;
+        uptime) uptime ;;
+        whoami) whoami ;;
+        hostname) hostname ;;
+        df) df -h ;;
+        free) free -h ;;
+        study) study ;;
+        snake) snake ;;
+        tetris) tetris ;;
+        github) github ;;
+        youtube) youtube ;;
+        telegram) telegram ;;
+        vscode) vscode ;;
+        notion) notion ;;
+        rm) rm_file "${args[@]}" ;;
+        asmemu) asmemu ;;
+        nano) nano "${args[@]}" ;;
+        vim) vim "${args[@]}" ;;
+        touch) touch "${args[@]}" ;;
+        tutorial) tutorial ;;
+        *) echo -e "${RED}Unknown command!${RESET}"; show_help ;;
+    esac
+done
